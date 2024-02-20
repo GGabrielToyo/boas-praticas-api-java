@@ -3,8 +3,6 @@ package br.com.alura.adopet.api.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -15,34 +13,32 @@ public class Adocao {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
-    @Column(name = "data")
     private LocalDateTime data;
 
-    @NotNull
-    @ManyToOne
-    @JsonBackReference("tutor_adocoes")
-    @JoinColumn(name = "tutor_id")
+    @ManyToOne(fetch = FetchType.LAZY)
     private Tutor tutor;
 
-    @NotNull
-    @OneToOne
-    @JoinColumn(name = "pet_id")
-    @JsonManagedReference("adocao_pets")
+    @OneToOne(fetch = FetchType.LAZY)
     private Pet pet;
 
-    @NotBlank
-    @Column(name = "motivo")
     private String motivo;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
     private StatusAdocao status;
 
-    @Column(name = "justificativa_status")
     private String justificativaStatus;
+
+    public Adocao(){}
+
+    public Adocao(Tutor tutor, Pet pet, String motivo) {
+        this.tutor = tutor;
+        this.pet = pet;
+        this.motivo = motivo;
+        this.status = StatusAdocao.AGUARDANDO_AVALIACAO;
+        this.data = LocalDateTime.now();
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -111,5 +107,14 @@ public class Adocao {
 
     public void setJustificativaStatus(String justificativaStatus) {
         this.justificativaStatus = justificativaStatus;
+    }
+
+    public void marcarComoAprovada(){
+        this.status = StatusAdocao.APROVADO;
+    }
+
+    public void marcarComoReprovada(String justificativa){
+        this.status = StatusAdocao.REPROVADO;
+        this.justificativaStatus = justificativa;
     }
 }
